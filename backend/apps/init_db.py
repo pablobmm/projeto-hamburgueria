@@ -1,6 +1,7 @@
 from apps.app import app, db_serv 
 from apps.lanche.model_lanche import Lanche
 from apps.usuario.model_usuario import Usuario
+from apps.erp.models import ItemEstoque, Pedido, itens_pedido
 
 def seed_database():
     """Popula a tabela de lanches com dados de exemplo."""
@@ -72,7 +73,7 @@ def init():
     with app.app_context():
         print("--- INICIANDO PROCESSO DE MANUTENÇÃO DO BANCO ---")
                 
-        print("1. Criando tabelas (com a nova coluna imagem)...")
+        print("1. Criando tabelas (incluindo Estoque e Pedidos)...")
         db_serv.create_all() 
         
         print("2. Verificando se precisa de dados iniciais...")

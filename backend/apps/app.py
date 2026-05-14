@@ -20,11 +20,14 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get("MAIL_USERNAME")
 # CONFIGURAÇÃO DO BANCO DE DADOS
 DB_USER = os.environ.get("MYSQL_USER_APP", "root")
 DB_PASSWORD = os.environ.get("MYSQL_PASSWORD_APP", "12345")
-DB_HOST = os.environ.get("DB_HOST")
-DB_PORT = os.environ.get("DB_PORT")
-DB_NAME = os.environ.get("DB_NAME")
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_PORT = os.environ.get("DB_PORT", "3306")
+DB_NAME = os.environ.get("DB_NAME", "hamburgueria")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+if not os.environ.get("DB_HOST"):
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///hamburgueria.db"
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # INICIALIZAÇÃO DAS EXTENSÕES 
