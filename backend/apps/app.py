@@ -41,6 +41,7 @@ app.config['DEBUG'] = True
 from apps.lanche.route_lanche import bd_Lanche
 from apps.usuario.route_usuario import bd_usuario
 from apps.login.route_login import bd_login
+from apps.pedido.model_pedido import Pedido
 
 app.register_blueprint(bd_Lanche)
 app.register_blueprint(bd_usuario, url_prefix='/usuario')
