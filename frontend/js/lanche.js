@@ -3,6 +3,7 @@ let todosOsLanches = [];
 document.addEventListener('DOMContentLoaded', () => {
     buscarLanches();
 });
+
 async function buscarLanches() {
     const urlAPI = 'http://localhost:5002/admin/api/admin/produtos';
     try {
@@ -13,7 +14,8 @@ async function buscarLanches() {
         }
         todosOsLanches = await response.json();
         console.log('Dados recebidos da API:', todosOsLanches);
-        filtrarPorCategoria('Burgers');
+        
+        filtrarPorCategoria(1);
 
     } catch (error) {
         console.error('Ocorreu um erro ao buscar os lanches:', error);
@@ -25,13 +27,30 @@ async function buscarLanches() {
 }
 
 function filtrarPorCategoria(categoriaDesejada) {
-    const lanchesFiltrados = todosOsLanches.filter(lanche =>
-        lanche.categoria.toLowerCase() === categoriaDesejada.toLowerCase()
-    );
-    exibirLanchesNaPagina(lanchesFiltrados);
+    const deParaCategorias = {
+        '1': 'burgers',
+        '2': 'pizza',
+        '3': 'vegetariano',
+        '4': 'kids',
+        'burgers': '1',
+        'pizza': '2',
+        'vegetariano': '3',
+        'kids': '4'
+    };
+
+    const lanchesFiltrados = todosOsLanches.filter(lanche => {
+        if (!lanche.categoria) return false;
+
+        const categoriaLancheStr = String(lanche.categoria).toLowerCase();
+        const buscaStr = String(categoriaDesejada).toLowerCase();
+
+        return categoriaLancheStr === buscaStr || deParaCategorias[categoriaLancheStr] === buscaStr;
+    });
+
+    exibirLanchesNaPagina(lanchesFiltrados, categoriaDesejada);
 }
 
-function exibirLanchesNaPagina(lanches) {
+function exibirLanchesNaPagina(lanches, categoriaAtual) {
     const container = document.getElementById('lista-lanches');
     if (!container) return;
     container.innerHTML = '';
@@ -41,20 +60,32 @@ function exibirLanchesNaPagina(lanches) {
         return;
     }
 
+    const nomesFormatados = {
+        '1': 'Burgers',
+        '2': 'Pizza',
+        '3': 'Vegetariano',
+        '4': 'Kids'
+    };
+
     lanches.forEach(lanche => {
-        
         let imageUrl = '';
+
+        const idCategoria = lanche.categoria;
+        const nomePasta = nomesFormatados[idCategoria] ? nomesFormatados[idCategoria].toLowerCase() : 'burgers';
 
         if (lanche.imagem && lanche.imagem.startsWith('http')) {
             imageUrl = lanche.imagem;
+        } else if (lanche.imagem && lanche.imagem.startsWith('static/')) {
+            imageUrl = `http://localhost:5002/${lanche.imagem}`;
         } else if (lanche.imagem) {
-            imageUrl = `/frontend/assets/${lanche.categoria}/${lanche.imagem}`;
+            imageUrl = `/frontend/assets/${nomePasta}/${lanche.imagem}`;
         } else {
             imageUrl = '/frontend/assets/burgers/burger1.png'; 
         }
 
         const descReal = lanche.descricao || "";
         const descParaOnclick = descReal.replace(/\r?\n|\r/g, ' ').replace(/'/g, "\\'");
+        const nomeCategoriaExibição = nomesFormatados[idCategoria] || 'Burgers';
 
         const cardHTML = `
             <a href="#" class="product-item" 
@@ -63,7 +94,7 @@ function exibirLanchesNaPagina(lanches) {
                     <img src="${imageUrl}" alt="${lanche.nome}" onerror="this.src='/frontend/assets/burgers/burger1.png'"/>
                 </div>
                 <div class="info">
-                    <div class="product-category">${lanche.categoria}</div>
+                    <div class="product-category">${nomeCategoriaExibição}</div>
                     <div class="product-name">${lanche.nome}</div>
                     <div class="product-description">${descReal}</div> 
                     <div class="product-price">${Number(lanche.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
@@ -83,6 +114,5 @@ function selecionarLanche(nome, imagemUrl, preco, descricao) {
     };
 
     localStorage.setItem('lancheParaPersonalizar', JSON.stringify(lancheSelecionado));
-
     window.location.href = '/frontend/pages/personalizacao.html';
 }
