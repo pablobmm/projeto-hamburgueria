@@ -18,11 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error("Botão 'Adicionar ao carrinho' (.btn-add) não foi encontrado!");
     }
-    if (btnSalvar) {
-        btnSalvar.addEventListener('click', () => adicionarAoCarrinho('index.html'));
-    } else {
-        console.error("Botão 'Salvar' (.btn-save) não foi encontrado!");
-    }
+    
 });
 
 function iniciarModoEdicao() {
