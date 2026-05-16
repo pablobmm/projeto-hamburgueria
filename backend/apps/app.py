@@ -41,10 +41,14 @@ app.config['DEBUG'] = True
 from apps.lanche.route_lanche import bd_Lanche
 from apps.usuario.route_usuario import bd_usuario
 from apps.login.route_login import bd_login
+from apps.pedido.model_pedido import Pedido
+from apps.pedido.model_item_pedido import ItemPedido
+from apps.pedido.route_pedido import pedido_bp
 
 app.register_blueprint(bd_Lanche)
 app.register_blueprint(bd_usuario, url_prefix='/usuario')
 app.register_blueprint(bd_login)
 app.register_blueprint(admin_bp, url_prefix='/admin')
+app.register_blueprint(pedido_bp, url_prefix='/pedido')
 if __name__ == "__main__":
     app.run(host=app.config['HOST'], port=app.config['PORT'], debug=app.config['DEBUG'])
