@@ -48,6 +48,16 @@ function formatPhone(phone) {
     return cleanPhone;
 }
 
+function validateCep(cep) {
+    const cleanCep = cep.replace(/\D/g, '');
+    return cleanCep.length === 8;
+}
+
+function validateBairro(bairro) {
+    const regexApenasLetras = /^[^0-9]+$/;
+    return regexApenasLetras.test(bairro);
+}
+
 document.getElementById('telefone').addEventListener('input', function(e) {
     e.target.value = formatPhone(e.target.value);
 });
@@ -59,12 +69,15 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
     const email = document.getElementById('email').value.trim();
     const telefone = document.getElementById('telefone').value.trim();
     const endereco = document.getElementById('endereco').value.trim();
+    const numero = document.getElementById('numero').value.trim();
+    const bairro = document.getElementById('bairro').value.trim();
+    const cep = document.getElementById('cep').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     const cadastroBtn = document.getElementById('cadastroBtn');
     
    
-    if (!nome || !email || !telefone || !password || !confirmPassword) {
+    if (!nome || !email || !telefone || !endereco || !numero || !bairro || !password || !confirmPassword) {
         showToast('Erro', 'Por favor, preencha todos os campos');
         return;
     }
@@ -88,6 +101,15 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
         showToast('Erro', 'As senhas não coincidem');
         return;
     }
+    if (!validateBairro(bairro)) {
+        showToast('Erro', 'O campo Bairro não deve conter números.');
+        return;
+    }
+
+    if (!validateCep(cep)) {
+        showToast('Erro', 'Por favor, insira um CEP válido com 8 dígitos.');
+        return;
+    }
     
     
     cadastroBtn.textContent = 'Criando conta...';
@@ -104,6 +126,9 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
             email: email,
             telefone: telefone,
             endereco: endereco,
+            numero: numero,
+            bairro: bairro,
+            cep: cep,
             senha: password 
         })
     })
@@ -129,6 +154,13 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
     });
 });
 
+document.getElementById('cep').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, ''); 
+    if (value.length > 5) {
+        value = `${value.slice(0, 5)}-${value.slice(5, 8)}`;
+    }
+    e.target.value = value;
+});
 
 document.addEventListener('click', function(e) {
     const toast = document.getElementById('toast');
@@ -140,18 +172,22 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('nome').focus();
     
-    const inputs = ['nome', 'email', 'telefone', 'password', 'confirmPassword'];
+    const inputs = ['nome', 'email', 'telefone', 'endereco', 'numero', 'bairro', 'cep', 'password', 'confirmPassword'];
+    
     inputs.forEach((inputId, index) => {
-        document.getElementById(inputId).addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (index < inputs.length - 1) {
-                    document.getElementById(inputs[index + 1]).focus();
-                } else {
-                    document.getElementById('cadastroForm').dispatchEvent(new Event('submit'));
+        const element = document.getElementById(inputId);
+        if (element) {
+            element.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (index < inputs.length - 1) {
+                        document.getElementById(inputs[index + 1]).focus();
+                    } else {
+                        document.getElementById('cadastroForm').requestSubmit();
+                    }
                 }
-            }
-        });
+            });
+        }
     });
 });
 

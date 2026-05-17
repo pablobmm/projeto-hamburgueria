@@ -7,7 +7,10 @@ class Usuario(db_serv.Model):
     nome = db_serv.Column(db_serv.String(100), nullable=False)
     email = db_serv.Column(db_serv.String(100), unique=True, nullable=False)
     telefone = db_serv.Column(db_serv.String(20), nullable=True)
-    endereco = db_serv.Column(db_serv.String(200), nullable=True)
+    endereco = db_serv.Column(db_serv.String(200), nullable=False)
+    numero = db_serv.Column(db_serv.String(10), nullable=False)
+    bairro = db_serv.Column(db_serv.String(100), nullable=False)
+    cep = db_serv.Column(db_serv.String(9), nullable=True)
     senha_hash = db_serv.Column(db_serv.String(256), nullable=False) 
     otp_secret = db_serv.Column(db_serv.Integer, nullable=True) 
     is_active = db_serv.Column(db_serv.Boolean, default= False, nullable=False) 
@@ -20,6 +23,9 @@ class Usuario(db_serv.Model):
             'email': self.email,
             'telefone': self.telefone,
             'endereco': self.endereco,
+            'numero': self.numero,
+            'bairro': self.bairro,
+            'cep':self.cep,
             'otp_secret': self.otp_secret,
             'is_active': self.is_active
         }
