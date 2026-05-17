@@ -22,6 +22,9 @@ def cadastrar_usuario():
         email=email_cliente,
         telefone=dados.get('telefone'),
         endereco=dados.get('endereco'),
+        numero=dados.get('numero'),
+        bairro=dados.get('bairro'),
+        cep=dados.get('cep'),
         senha_hash=generate_password_hash(senha_cliente),
         otp_secret=token_ativacao,
         is_active=False
