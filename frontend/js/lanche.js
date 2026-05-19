@@ -69,7 +69,6 @@ function exibirLanchesNaPagina(lanches, categoriaAtual) {
 
     lanches.forEach(lanche => {
         let imageUrl = '';
-
         const idCategoria = lanche.categoria;
         const nomePasta = nomesFormatados[idCategoria] ? nomesFormatados[idCategoria].toLowerCase() : 'burgers';
 
@@ -78,9 +77,18 @@ function exibirLanchesNaPagina(lanches, categoriaAtual) {
         } else if (lanche.imagem && lanche.imagem.startsWith('static/')) {
             imageUrl = `http://localhost:5002/${lanche.imagem}`;
         } else if (lanche.imagem) {
-            imageUrl = `/frontend/assets/${nomePasta}/${lanche.imagem}`;
+            const imagensPadraoNativas = [
+                'burger1.png', 'burger2.png', 'burger3.png', 'burger4.png', 'burger5.png', 'burger6.png',
+                'pizza10.png', 'pizza11.png', 'vegetariano20.png', 'kids30.png', 'default_burger.png'
+            ];
+
+            if (!imagensPadraoNativas.includes(lanche.imagem)) {
+                imageUrl = `../assets/burgers/${lanche.imagem}`;
+            } else {
+                imageUrl = `../assets/${nomePasta}/${lanche.imagem}`;
+            }
         } else {
-            imageUrl = '/frontend/assets/burgers/burger1.png'; 
+            imageUrl = '../assets/burgers/burger1.png'; 
         }
 
         const descReal = lanche.descricao || "";
@@ -91,7 +99,7 @@ function exibirLanchesNaPagina(lanches, categoriaAtual) {
             <a href="#" class="product-item" 
                 onclick="selecionarLanche('${lanche.nome}', '${imageUrl}', '${lanche.preco}', '${descParaOnclick}')"> 
                 <div class="photo">
-                    <img src="${imageUrl}" alt="${lanche.nome}" onerror="this.src='/frontend/assets/burgers/burger1.png'"/>
+                    <img src="${imageUrl}" alt="${lanche.nome}" onerror="this.onerror=null; this.src='../assets/burgers/burger1.png'"/>
                 </div>
                 <div class="info">
                     <div class="product-category">${nomeCategoriaExibição}</div>
