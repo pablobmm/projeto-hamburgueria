@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5002/admin/stats"; 
+const API_URL = "http://localhost:5002/admin/stats";
 const API_PRODUTOS = "http://localhost:5002/admin/produtos";
 
 const modal = document.getElementById("modalLanche");
@@ -38,7 +38,6 @@ async function carregarProdutos() {
 
         produtos.forEach(p => {
             let imageUrl = '';
-
             const idCategoria = String(p.categoria);
             const nomePasta = pastasCategorias[idCategoria] || 'burgers';
 
@@ -47,18 +46,27 @@ async function carregarProdutos() {
             } else if (p.imagem && p.imagem.startsWith('static/')) {
                 imageUrl = `http://localhost:5002/${p.imagem}`;
             } else if (p.imagem) {
-                imageUrl = `/frontend/assets/${nomePasta}/${p.imagem}`;
+                const imagensPadraoNativas = [
+                    'burger1.png', 'burger2.png', 'burger3.png', 'burger4.png', 'burger5.png', 'burger6.png',
+                    'pizza10.png', 'pizza11.png', 'vegetariano20.png', 'kids30.png', 'default_burger.png'
+                ];
+
+                if (!imagensPadraoNativas.includes(p.imagem)) {
+                    imageUrl = `../assets/burgers/${p.imagem}`;
+                } else {
+                    imageUrl = `../assets/${nomePasta}/${p.imagem}`;
+                }
             } else {
-                imageUrl = '/frontend/assets/burgers/burger1.png';
+                imageUrl = '../assets/burgers/burger1.png';
             }
 
-        tabela.innerHTML += `
+            tabela.innerHTML += `
             <tr>
                 <td>#${p.id}</td>
                 <td>
                     <img src="${imageUrl}" width="40" height="40" 
                         style="border-radius: 5px; object-fit: cover;" 
-                        onerror="this.onerror=null; this.src='/frontend/assets/burgers/burger1.png'">
+                        onerror="this.onerror=null; this.src='../assets/burgers/burger1.png'">
                 </td>
                 <td>${p.nome}</td>
                 <td>R$ ${Number(p.preco).toFixed(2)}</td>
@@ -77,7 +85,6 @@ async function carregarProdutos() {
         console.error("Erro ao carregar produtos:", erro);
     }
 }
-
 
 function abrirModal(lanche = null) {
     modal.style.display = "block";
@@ -99,7 +106,6 @@ function abrirModal(lanche = null) {
         document.getElementById("lancheCategoria").value = "1";
     }
 }
-
 
 function fecharModal() {
     modal.style.display = "none";
