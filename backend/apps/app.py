@@ -1,10 +1,10 @@
 import os
-from apps.admin.route_admin import admin_bp
 from flask import Flask
 from flask_cors import CORS
 from flasgger import Swagger
 from apps.extensions import db_serv, mail 
 from flask_mail import Message
+
 app = Flask(__name__)
 CORS(app)
 
@@ -44,11 +44,13 @@ from apps.login.route_login import bd_login
 from apps.pedido.model_pedido import Pedido
 from apps.pedido.model_item_pedido import ItemPedido
 from apps.pedido.route_pedido import pedido_bp
+from apps.admin.route_admin import admin_bp
 
-app.register_blueprint(bd_Lanche)
+app.register_blueprint(bd_Lanche, url_prefix='/api')
 app.register_blueprint(bd_usuario, url_prefix='/usuario')
 app.register_blueprint(bd_login)
-app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(pedido_bp, url_prefix='/pedido')
+app.register_blueprint(admin_bp, url_prefix='/admin') 
+
 if __name__ == "__main__":
     app.run(host=app.config['HOST'], port=app.config['PORT'], debug=app.config['DEBUG'])

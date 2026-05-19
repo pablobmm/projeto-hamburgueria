@@ -1,5 +1,5 @@
-const API_URL = "http://localhost:5002/admin/api/admin/stats";
-const API_PRODUTOS = "http://localhost:5002/admin/api/admin/produtos";
+const API_URL = "http://localhost:5002/admin/stats"; 
+const API_PRODUTOS = "http://localhost:5002/admin/produtos";
 
 const modal = document.getElementById("modalLanche");
 const formLanche = document.getElementById("formLanche");
@@ -29,38 +29,55 @@ async function carregarProdutos() {
         const tabela = document.getElementById("lista-produtos");
         tabela.innerHTML = "";
 
+        const pastasCategorias = {
+            '1': 'burgers',
+            '2': 'pizza',
+            '3': 'vegetariano',
+            '4': 'kids'
+        };
+
         produtos.forEach(p => {
             let imageUrl = '';
 
+            const idCategoria = String(p.categoria);
+            const nomePasta = pastasCategorias[idCategoria] || 'burgers';
+
             if (p.imagem && p.imagem.startsWith('http')) {
                 imageUrl = p.imagem;
+            } else if (p.imagem && p.imagem.startsWith('static/')) {
+                imageUrl = `http://localhost:5002/${p.imagem}`;
             } else if (p.imagem) {
-                imageUrl = `/frontend/assets/${p.categoria}/${p.imagem}`;
+                imageUrl = `/frontend/assets/${nomePasta}/${p.imagem}`;
             } else {
                 imageUrl = '/frontend/assets/burgers/burger1.png';
             }
 
-            tabela.innerHTML += `
-                <tr>
-                    <td>#${p.id}</td>
-                    <td><img src="${imageUrl}" width="40" style="border-radius: 5px; object-fit: cover;"></td>
-                    <td>${p.nome}</td>
-                    <td>R$ ${Number(p.preco).toFixed(2)}</td>
-                    <td>
-                        <button class="btn-edit" onclick="editar(${p.id})">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button class="btn-delete" onclick="excluir(${p.id})">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
+        tabela.innerHTML += `
+            <tr>
+                <td>#${p.id}</td>
+                <td>
+                    <img src="${imageUrl}" width="40" height="40" 
+                        style="border-radius: 5px; object-fit: cover;" 
+                        onerror="this.onerror=null; this.src='/frontend/assets/burgers/burger1.png'">
+                </td>
+                <td>${p.nome}</td>
+                <td>R$ ${Number(p.preco).toFixed(2)}</td>
+                <td>
+                    <button class="btn-edit" onclick="editar(${p.id})">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn-delete" onclick="excluir(${p.id})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
         });
     } catch (erro) {
         console.error("Erro ao carregar produtos:", erro);
     }
 }
+
 
 function abrirModal(lanche = null) {
     modal.style.display = "block";
@@ -73,12 +90,16 @@ function abrirModal(lanche = null) {
         document.getElementById("lancheNome").value = lanche.nome;
         document.getElementById("lancheDescricao").value = lanche.descricao;
         document.getElementById("lanchePreco").value = lanche.preco;
-        document.getElementById("lancheCategoria").value = lanche.categoria || "Burgers";
+
+        const idCategoria = lanche.categoria ? String(lanche.categoria) : "1";
+        document.getElementById("lancheCategoria").value = idCategoria;
 
     } else {
         document.getElementById("modalTitle").innerText = "Novo Produto";
+        document.getElementById("lancheCategoria").value = "1";
     }
 }
+
 
 function fecharModal() {
     modal.style.display = "none";
@@ -127,7 +148,7 @@ formLanche.onsubmit = async (e) => {
             carregarDadosDashboard();
         } else {
             const erroData = await response.json();
-            alert(`Erro: ${erroData.Erro || "Erro ao salvar"}`);
+            alert(`Erro: ${erroData.erro || erroData.Erro || "Erro ao salvar"}`);
         }
     } catch (error) {
         alert("Falha na comunicação com o servidor.");

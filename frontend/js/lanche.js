@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function buscarLanches() {
-    const urlAPI = 'http://localhost:5002/admin/api/admin/produtos';
+    const urlAPI = 'http://localhost:5002/api/lanche';
     try {
         const response = await fetch(urlAPI);
 
