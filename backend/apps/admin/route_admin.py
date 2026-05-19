@@ -113,7 +113,7 @@ def editar_produto(id):
             lanche.imagem = filename 
 
         db_serv.session.commit()
-        db_serv.session.clear()
+        db_serv.session.expire_all()
         return jsonify({"mensagem": "Lanche atualizado com sucesso!"}), 200
     except Exception as e:
         db_serv.session.rollback()
