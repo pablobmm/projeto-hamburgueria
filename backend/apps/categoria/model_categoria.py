@@ -1,4 +1,4 @@
-from apps.app import db_serv
+from apps.extensions import db_serv
 
 class Categoria(db_serv.Model):
     __tablename__="categorias"

@@ -1,4 +1,6 @@
+import os
 from apps.extensions import db_serv
+from apps.categoria.model_categoria import Categoria
 
 class Lanche (db_serv.Model):
     __tablename__ = "lanches"
@@ -11,13 +13,13 @@ class Lanche (db_serv.Model):
     categoria_id = db_serv.Column(db_serv.ForeignKey('categorias.id'), nullable=False)
     imagem = db_serv.Column(db_serv.String(255))
     
-    def __init__(self, nome, preco, descricao,imagem,categoria_id=None, id=None):
-        self.id = id
+    def __init__(self, nome=None, preco=None, descricao=None, imagem=None, categoria_id=1, id=None, **kwargs):
+        if id: self.id = id
         self.nome = nome
         self.preco = preco
         self.descricao = descricao
-        self.categoria_id = categoria_id
         self.imagem = imagem
+        self.categoria_id = categoria_id
 
     def to_dict(self):
         return {
@@ -25,28 +27,11 @@ class Lanche (db_serv.Model):
             "nome": self.nome,
             "preco": self.preco,
             "descricao": self.descricao,
-            "categoria": self.categoria_id,
-            "imagem":self.imagem
+            "categoria": self.categoria_id, 
+            "imagem": self.imagem
         }
 
-    def atualizarLanche(self, id):
-        try:
-            lanche = Lanche.query.get(id)
-            if lanche is None:
-                return {"erro": "Lanche não encontrado"}, 404
-            lanche.nome = self.nome
-            lanche.descricao = self.descricao
-            lanche.preco = self.preco
-            lanche.imagem = self.imagem
-            lanche.categoria_id = self.categoria_id
-            db_serv.session.commit()
-            return {"mensagem": "Lanche atualizado com sucesso!"}, 200
-        except Exception as e:
-            db_serv.session.rollback()
-            return {"erro": str(e)}, 500  
-        
-### ===== Classe de exceção ===== ###
-
+    
 class LancheJaExiste(Exception):
     def __init__(self, msg="Erro, já existe um lanche com esse id!"):
         self.msg = msg
@@ -55,72 +40,67 @@ class LancheJaExiste(Exception):
 class LancheNaoExiste(Exception):
     def __init__(self, msg="Erro, o lanche não existe!"):
         self.msg = msg
-        super().__init__(msg)
+        super().__init__(self.msg)
 
 class CadastroDeLancheFalhado(Exception):
     def __init__(self, msg="Erro ao processar o cadastro do lanche!"):
         self.msg = msg
         super().__init__(msg)
 
-class LancheSemId(Exception):
-    def __init__(self, msg="Erro! Preencha o campo 'Id' do lanche! "):
-        self.msg = msg
-        super().__init__(msg)
-
-class LancheSemNome(Exception):
-    def __init__(self, msg="Erro! Preencha o campo 'Nome' do lanche! "):
-        self.msg = msg
-        super().__init__(msg)
-
-class LancheSemPreco(Exception):
-    def __init__(self, msg="Erro! Preencha o compo 'Preço' do lanche!"):
-        self.msg = msg
-        super().__init__(msg)
-
-class LancheSemDescricao(Exception):
-    def __init__(self, msg="Erro! Preencha o campo 'Descrição' do lanche"):
-        self.msg = msg
-        super().__init__(msg)
-
-
-
-### ===== Funções auxiliares ===== ###
 
 def criarLanche(nv_dict):
-    db_serv.session.add(nv_dict)
-    db_serv.session.commit()
-    return {"Descrição": "Lanche criado com êxito!"}, 200
-
+    try:
+        db_serv.session.add(nv_dict)
+        db_serv.session.commit()
+        return {"Descrição": "Lanche criado com êxito!"}, 200
+    except Exception as e:
+        db_serv.session.rollback()
+        return {"erro": str(e)}, 500
 
 def listarLanche():
+    db_serv.session.expire_all()    
     lanches = Lanche.query.all()
-    print(lanches)
     return [lanche.to_dict() for lanche in lanches]
 
-
 def lancheExiste(id):
-    """
-    Verifica se um lanche já existe, cujo argumento é o Id.
-    Caso lanche retorne None então lanche is not None, receberá False, 
-    caso o contrário True.
-    """
-    lanche = Lanche.query.get(id)
+    lanche = db_serv.session.get(Lanche, id)
     return lanche is not None
-
-      
 
 def deletarLanche(id_lanche):
     try:
-        lanche = Lanche.query.filter_by(id=id_lanche).first()
+        destinoPasta = os.path.join('frontend', 'assets', 'burgers')
 
-        if lanche is None:
-            return {"Mensagem": "Lanche não encontrado no banco!"}, 404
+        lanche = db_serv.session.get(Lanche, id_lanche)
         
+        if not lanche:
+            return {"Mensagem": "Lanche não encontrado no banco!"}, 404
+            
+        nome_imagem = lanche.imagem
+
+        if nome_imagem and nome_imagem not in ["burger1.png", "default_burger.png", ""]:
+            restantes = db_serv.session.query(Lanche).filter(Lanche.imagem == nome_imagem).count()
+            
+            deve_apagar_arquivo = (restantes <= 1)
+        else:
+            deve_apagar_arquivo = False
+
         db_serv.session.delete(lanche)
         db_serv.session.commit()
+
+        if deve_apagar_arquivo:
+            caminho_arquivo = os.path.join(destinoPasta, nome_imagem)
+            if os.path.exists(caminho_arquivo):
+                os.remove(caminho_arquivo)
+                print(f"Arquivo {nome_imagem} removido do disco porque era usado apenas pelo lanche deletado.")
+        else:
+            if nome_imagem and nome_imagem not in ["burger1.png", "default_burger.png", ""]:
+                print(f"Arquivo {nome_imagem} MANTIDO no disco. Outro lanche ainda está utilizando ele.")
+
+        db_serv.session.expire_all()
         return {"Mensagem": "Lanche deletado com sucesso!"}, 200
-        
+
     except Exception as e:
         db_serv.session.rollback() 
-        print(f"Erro SQL: {e}")
+        db_serv.session.expire_all()
+        print(f"Erro ao deletar lanche via ORM: {e}")
         return {"Erro": str(e)}, 500
