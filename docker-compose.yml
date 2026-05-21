@@ -21,6 +21,8 @@ services:
     container_name: cont_api
     ports:
       - "5002:5002"
+    env_file:
+      - .env
     volumes:
       - ./frontend/assets/burgers:/app/frontend/assets/burgers
       - ./backend:/app 
@@ -39,6 +41,5 @@ services:
       MAIL_PORT: ${MAIL_PORT}
       MAIL_USE_TLS: ${MAIL_USE_TLS}
       MAIL_USE_SSL: ${MAIL_USE_SSL}
-        
 volumes:
   mysql_data: 
