@@ -32,23 +32,35 @@ def checkout():
         db_serv.session.add(novo_pedido)
         db_serv.session.flush()
 
-        payment_data = {
-            "transaction_amount": float(total),
-            "description": f"Pedido Code Burger #{novo_pedido.id}",
-            "payment_method_id": "pix",
-            "external_reference": str(novo_pedido.id),
+        preference_data = {
+            "items": [
+                {
+                    "title": f"Pedido Code Burger #{novo_pedido.id}",
+                    "quantity": 1,
+                    "unit_price": float(total),
+                    "currency_id": "BRL"
+                }
+            ],
             "payer": {
-                "email": payer_email, 
-                "first_name": payer_name
-            }
+                "email": payer_email,
+                "name": payer_name
+            },
+            "back_urls": {
+                "success": "http://localhost:5500/frontend/pages/index.html",
+                "failure": "http://localhost:5500/frontend/pages/carrinho.html",
+                "pending": "http://localhost:5500/frontend/pages/carrinho.html"
+            },
+            "external_reference": str(novo_pedido.id)
         }
 
-        payment_response = sdk.payment().create(payment_data)
-        mp_res = payment_response["response"]
+        preference_response = sdk.preference().create(preference_data)
+        mp_res = preference_response["response"]
+
+        print("RETORNO DETALHADO DO MERCADO PAGO (PREFERENCE):", mp_res, flush=True)
 
         if "id" not in mp_res:
             db_serv.session.rollback()
-            return jsonify({"erro": "Falha ao gerar pagamento no Mercado Pago", "detalhes": mp_res}), 400
+            return jsonify({"erro": "Falha ao gerar preferência de pagamento no Mercado Pago", "detalhes": mp_res}), 400
 
         novo_pedido.mp_payment_id = str(mp_res.get("id")) 
 
@@ -63,13 +75,12 @@ def checkout():
 
         db_serv.session.commit()
 
-        transaction_data = mp_res.get("point_of_interaction", {}).get("transaction_data", {})
-        link_pix = transaction_data.get("ticket_url")
+        link_pagamento = mp_res.get("sandbox_init_point") or mp_res.get("init_point")
 
         return jsonify({
-            "mensagem": "Pedido e PIX criados com sucesso via Mercado Pago!",
+            "mensagem": "Pedido e Checkout criados com sucesso via Mercado Pago!",
             "pedido_id": novo_pedido.id,
-            "link_pagamento": link_pix
+            "link_pagamento": link_pagamento
         }), 201
 
     except Exception as e:

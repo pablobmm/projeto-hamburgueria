@@ -30,18 +30,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const itensCarrinho = JSON.parse(carrinhoRaw);
 
         const itensFormatadosBackend = itensCarrinho.map(item => {
-            let precoRaw = item.preco || item.preco_unitario || item.valor || "0";
-            
-            let precoLimpo = typeof precoRaw === 'number' ? precoRaw : 
-                String(precoRaw)
-                    .replace('R$', '')
-                    .replace(/\s/g, '')
-                    .replace('.', '')
-                    .replace(',', '.');
+            let precoRaw = item.precoTotalUnitario || item.precoBase || item.preco || 0;
+            let precoFinal = 0;
+
+            if (typeof precoRaw === 'number') {
+                precoFinal = precoRaw;
+            } else {
+                let str = String(precoRaw).replace(/R\$\s?/, '').trim();
+                if (str.includes(',')) {
+                    if (str.indexOf('.') < str.indexOf(',')) {
+                        str = str.replace(/\./g, '');
+                    }
+                    str = str.replace(',', '.');
+                }
+                precoFinal = parseFloat(str) || 0.0;
+            }
 
             return {
-                lanche_id: Number(item.id),
-                preco: parseFloat(precoLimpo) || 0.0,
+                lanche_id: 1, 
+                preco: precoFinal,
                 qtd: Number(item.quantidade || item.qtd || 1)
             };
         });
