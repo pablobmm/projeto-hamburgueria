@@ -9,7 +9,7 @@ class Pedido(db_serv.Model):
     valor_total = db_serv.Column(db_serv.Float, nullable=False)
     data_pedido = db_serv.Column(db_serv.DateTime, default=datetime.utcnow)
     status = db_serv.Column(db_serv.String(20), default="pendente") 
-    asaas_billing_id = db_serv.Column(db_serv.String(100), nullable=True) 
+    mp_payment_id = db_serv.Column(db_serv.String(100), nullable=True) 
 
     def to_dict(self):
         return {
