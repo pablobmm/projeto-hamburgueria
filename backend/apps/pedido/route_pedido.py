@@ -50,7 +50,8 @@ def checkout():
                 "failure": "http://localhost:5500/frontend/pages/carrinho.html",
                 "pending": "http://localhost:5500/frontend/pages/carrinho.html"
             },
-            "external_reference": str(novo_pedido.id)
+            "external_reference": str(novo_pedido.id),
+            "notification_url": "https://linseed-marrow-shopping.ngrok-free.dev/pedido/webhook"
         }
 
         preference_response = sdk.preference().create(preference_data)
@@ -87,3 +88,46 @@ def checkout():
         db_serv.session.rollback()
         print(f"ERRO NO CHECKOUT MERCADO PAGO: {e}")
         return jsonify({"erro": "Erro interno ao processar o checkout."}), 500
+    
+@pedido_bp.route('/webhook', methods=['POST'])
+def webhook():
+    id_pagamento = request.args.get('data.id') or request.args.get('id')
+    type_notificacao = request.args.get('type') or request.get_json().get('type')
+
+    if type_notificacao == 'payment' or request.args.get('topic') == 'payment':
+        if not id_pagamento:
+            dados_corpo = request.get_json() or {}
+            if 'data' in dados_corpo:
+                id_pagamento = dados_corpo['data'].get('id')
+
+        if id_pagamento:
+            try:
+                mp_token = os.environ.get("MERCADOPAGO_ACCESS_TOKEN")
+                sdk = mercadopago.SDK(mp_token)
+                
+                payment_info = sdk.payment().get(id_pagamento)
+                payment_data = payment_info["response"]
+
+                pedido_id_sistema = payment_data.get("external_reference")
+                status_pagamento = payment_data.get("status") 
+
+                if pedido_id_sistema:
+                    pedido = Pedido.query.get(int(pedido_id_sistema))
+                    
+                    if pedido:
+                        if status_pagamento == "approved":
+                            pedido.status = "pago"
+                        else:
+                            pedido.status = status_pagamento 
+                        
+                        pedido.mp_payment_id = str(id_pagamento)
+                        
+                        db_serv.session.commit()
+                        print(f"Pedido #{pedido_id_sistema} atualizado com sucesso para {status_pagamento}!")
+                        
+            except Exception as e:
+                db_serv.session.rollback()
+                print(f"Erro ao processar webhook do Mercado Pago: {e}")
+                return jsonify({"erro": "Erro interno ao processar notificação"}), 500
+
+    return jsonify({"status": "recebido"}), 200
