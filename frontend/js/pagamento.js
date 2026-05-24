@@ -1,4 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const authButtons = document.getElementById('auth-buttons');
+    const userProfile = document.getElementById('user-profile');
+    const userNameSpan = document.getElementById('user-name');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    const usuarioRaw = localStorage.getItem('usuarioLogado');
+
+    if (usuarioRaw) {
+        try {
+            const usuario = JSON.parse(usuarioRaw);
+            
+            if (authButtons) authButtons.style.display = 'none';
+            if (userProfile) userProfile.style.display = 'flex';
+            
+            if (userNameSpan && usuario.nome) {
+                userNameSpan.innerHTML = `<i class="fas fa-user" style="color: #ff9f1c; margin-right: 6px;"></i>Olá, ${usuario.nome.split(' ')[0]}`;
+            }
+        } catch (err) {
+            console.error("Erro ao processar dados do usuário logado:", err);
+        }
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('usuarioLogado');
+            window.location.reload(); 
+        });
+    }
     const cardNumberInput = document.getElementById('card-number');
     const cardNameInput = document.getElementById('card-name');
     const cardExpiryInput = document.getElementById('card-expiry');
