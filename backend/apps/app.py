@@ -53,4 +53,10 @@ app.register_blueprint(pedido_bp, url_prefix='/pedido')
 app.register_blueprint(admin_bp, url_prefix='/admin') 
 
 if __name__ == "__main__":
-    app.run(host=app.config['HOST'], port=app.config['PORT'], debug=app.config['DEBUG'])
+    port_render = int(os.environ.get("PORT", app.config['PORT']))
+    
+    app.run(
+        host=app.config['HOST'], 
+        port=port_render, 
+        debug=app.config['DEBUG']
+    )
