@@ -37,3 +37,4 @@ htmlcov/
 
 apps/__pycache__/
 apps/*/__pycache__/
+.vercel
