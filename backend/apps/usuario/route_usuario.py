@@ -4,8 +4,10 @@ from werkzeug.security import generate_password_hash
 from flask_mail import Message
 from apps.extensions import db_serv, mail 
 from apps.usuario.model_usuario import Usuario 
+from apps.usuario.email_templates import renderizar_template_email
 
 bd_usuario = Blueprint('usuario', __name__)
+
 
 @bd_usuario.route('/cadastro', methods=['POST'])
 def cadastrar_usuario():
@@ -14,7 +16,6 @@ def cadastrar_usuario():
     nome_cliente = dados.get('nome')
     senha_cliente = dados.get('senha')
 
-    # 1. Gerar o token de 6 dígitos
     token_ativacao = ''.join(random.choices(string.digits, k=6))
 
     novo_usuario = Usuario(
@@ -31,24 +32,28 @@ def cadastrar_usuario():
     )
 
     try:
-        # SALVA NO BANCO PRIMEIRO
         db_serv.session.add(novo_usuario)
         db_serv.session.commit()
         print(f"Usuário {nome_cliente} salvo com sucesso!")
 
-        # TENTA ENVIAR O E-MAIL (Se falhar, não trava o cadastro)
         try:
+            html_conteudo = renderizar_template_email(
+                nome=nome_cliente, 
+                codigo=token_ativacao,
+                titulo_contexto="Ative sua Conta!",
+                texto_contexto="Seja bem-vindo à nossa comunidade! Use o código de ativação abaixo para confirmar seu perfil:"
+            )
+            
             msg = Message(
                 subject="Ative sua conta - Code Burger",
                 sender=current_app.config['MAIL_USERNAME'],
                 recipients=[email_cliente],
-                body=f"Olá {nome_cliente}!\n\nSeu código de ativação é: {token_ativacao}"
+                html=html_conteudo 
             )
             mail.send(msg)
-            print("E-mail enviado com sucesso!")
+            print("E-mail com template HTML enviado com sucesso!")
         except Exception as e_mail:
             print(f"Erro ao enviar e-mail: {e_mail}")
-            # Não retornamos erro aqui para o front não travar
 
         return jsonify({"message": "Usuário cadastrado! Verifique seu e-mail."}), 201
 
@@ -56,7 +61,7 @@ def cadastrar_usuario():
         db_serv.session.rollback()
         print(f"Erro no banco: {str(e)}")
         return jsonify({"erro": "Este e-mail já está cadastrado ou ocorreu um erro no servidor."}), 500
-
+    
 @bd_usuario.route('/recuperar-senha', methods=['POST'])
 def recuperar_senha():
     dados = request.get_json()
@@ -106,7 +111,6 @@ def reenviar_codigo():
     usuario = Usuario.query.filter_by(email=email).first()
     
     if usuario:
-        # Gera novo código de 6 dígitos
         novo_codigo = str(random.randint(100000, 999999))
         usuario.otp_secret = novo_codigo
         
@@ -114,17 +118,25 @@ def reenviar_codigo():
         db_serv.session.commit()
 
         try:
+            html_conteudo = renderizar_template_email(
+                nome=usuario.nome, 
+                codigo=novo_codigo,
+                titulo_contexto="Novo Código de Ativação",
+                texto_contexto="Você solicitou um novo código de verificação. Aqui está ele:"
+            )
+            
             msg = Message(
                 subject="Novo código de ativação - Code Burger",
                 recipients=[email],
-                body=f"Seu novo código é: {novo_codigo}"
+                html=html_conteudo 
             )
             mail.send(msg)
             return jsonify({"mensagem": "Novo código enviado!"}), 200
         except Exception as e:
             print(f"Erro ao enviar reenvio: {e}")
             return jsonify({"erro": "Falha ao enviar e-mail"}), 500
-
+            
+    return jsonify({"erro": "Usuário não encontrado."}), 404
 
 
 @bd_usuario.route('/verificar', methods=['POST'])
