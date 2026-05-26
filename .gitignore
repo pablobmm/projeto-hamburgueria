@@ -38,3 +38,5 @@ htmlcov/
 apps/__pycache__/
 apps/*/__pycache__/
 .vercel
+
+frontend/js/env.js

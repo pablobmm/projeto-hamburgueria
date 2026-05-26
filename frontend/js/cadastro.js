@@ -141,7 +141,7 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
             console.log("Usuário criado no banco. Disparando e-mail pelo EmailJS...");
 
             const templateParams = {
-                nome: data.nome,
+                name: data.nome,
                 email: data.email,
                 token: data.token
             };
