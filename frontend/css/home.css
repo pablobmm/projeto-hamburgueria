@@ -338,8 +338,87 @@ footer {
     padding: 60px 0;
 }
 
+/* ==========================================================================
+   REGRAS DE RESPONSIVIDADE (MOBILE / APK) - COMPLETO E CORRIGIDO
+   ========================================================================== */
+
 @media (max-width: 820px) {
-    header nav { display: none; }
+    header .container {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 15px 20px !important;
+    }
+
+    /* Esconde os textos e botões do topo por padrão quando o menu NÃO está ativo */
+    header .nav-menu .leftside,
+    header .nav-menu .rightside:not(:last-child) { 
+        display: none; 
+    }
+
+    /* Configuração estrutural do NAV no mobile */
+    header .nav-menu {
+        display: none !important; /* Escondido por padrão */
+        flex-direction: column !important;
+        position: absolute !important;
+        top: 80px !important; /* Alinhado logo abaixo do topo */
+        left: 0 !important;
+        width: 100% !important;
+        background-color: #1c1c1c !important;
+        padding: 20px !important;
+        gap: 20px !important;
+        z-index: 9999 !important;
+        border-bottom: 2px solid #FE6A0F !important;
+    }
+
+    /* 🌟 QUANDO O MENU ESTIVER ATIVO: Exibe e força o comportamento vertical de tudo lá dentro */
+    header .nav-menu.active {
+        display: flex !important;
+    }
+
+    header .nav-menu.active .leftside {
+        display: flex !important;
+        flex-direction: column !important;
+        padding-left: 0 !important;
+        gap: 15px !important;
+        width: 100% !important;
+        text-align: center !important;
+    }
+
+    header .nav-menu.active .rightside:not(:last-child) {
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    header .nav-menu .button {
+        width: 80% !important;
+        text-align: center !important;
+    }
+
+    /* 🛒 Mantém apenas o carrinho visível no topo direito fixo, fora do menu drop-down */
+    header .nav-menu .rightside:last-child {
+        display: flex !important;
+        position: fixed !important;
+        top: 22px !important;
+        right: 20px !important;
+        z-index: 10000 !important;
+    }
+
+    .cart-icon {
+        font-size: 20px !important;
+        padding: 6px 10px !important;
+    }
+
+    /* Exibe os três riscos do menu hambúrguer */
+    header .menu {
+        display: block !important;
+        cursor: pointer;
+        order: -1; /* Joga os três riscos para a esquerda da logo */
+    }
+
+    /* Ajustes de responsividade do Hero e Grid */
     .hero .container { flex-direction: column; }
     .hero .leftside { text-align: center; padding-bottom: 40px; }
     .hero .rightside img { height: 300px; }
@@ -347,3 +426,25 @@ footer {
     .search .sides { flex-direction: column; gap: 20px; }
     .products-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ===== Regras Globais Organizadoras (Fora do Media Query) ===== */
+header {
+    position: relative;
+}
+
+header .menu {
+    display: none;
+}
+
+.menu-icon div {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    margin: 5px;
+    transition: 0.4s;
+}
+
+/* Transição para transformar os três riscos em um 'X' se usar a classe toggle-icon no JS */
+.menu.toggle-icon .menu-icon div:nth-child(1) { transform: rotate(-45deg) translate(-5px, 6px); }
+.menu.toggle-icon .menu-icon div:nth-child(2) { opacity: 0; }
+.menu.toggle-icon .menu-icon div:nth-child(3) { transform: rotate(45deg) translate(-5px, -6px); }

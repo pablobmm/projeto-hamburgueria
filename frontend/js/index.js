@@ -56,4 +56,17 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  const btnMenu = document.getElementById('btn-menu');
+    const navMenu = document.getElementById('nav-menu');
+
+    if (btnMenu && navMenu) {
+        btnMenu.addEventListener('click', () => {
+            // Liga/Desliga a classe 'active' que mostra o menu no CSS
+            navMenu.classList.toggle('active');
+            
+            // Opcional: Animação simples transformando os três riscos em um 'X'
+            btnMenu.classList.toggle('toggle-icon');
+        });
+    }
 });

@@ -40,3 +40,4 @@ apps/*/__pycache__/
 .vercel
 
 frontend/js/env.js
+.env*

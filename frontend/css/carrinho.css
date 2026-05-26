@@ -236,3 +236,60 @@ body {
 .continuar-comprando:hover {
    background-color: #e05a0d;
 }
+
+
+@media (max-width: 820px) {
+    /* Alinha a logo centralizada no celular, combinando com a home */
+    .header {
+        padding: 15px 20px;
+        text-align: center;
+    }
+
+    /* Força o resumo do pedido a ir para debaixo da lista de lanches */
+    .carrinho-layout {
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    /* Faz com que tanto a lista quanto o resumo ocupem toda a largura disponível */
+    .itens-carrinho, 
+    .resumo-pedido {
+        width: 100%;
+        flex: none;
+    }
+
+    /* Tira o comportamento "sticky" no mobile para não bugar a rolagem da tela */
+    .resumo-pedido {
+        position: static;
+        padding: 20px;
+    }
+
+    /* Reorganiza o card do item do carrinho para caber em telas bem pequenas */
+    .item-carrinho {
+        flex-direction: column; /* Coloca foto, info e botões empilhados */
+        text-align: center;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    /* Centraliza a imagem do hambúrguer no topo do card */
+    .item-carrinho img {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+
+    /* Agrupa os botões de ação e o contador na vertical */
+    .item-carrinho .acoes {
+        width: 100%;
+        flex-direction: row; /* Mantém contador e ações lado a lado na horizontal */
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #444;
+        padding-top: 15px;
+    }
+    
+    .botoes-acao {
+        gap: 5px;
+    }
+}
