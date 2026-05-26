@@ -6,7 +6,10 @@ from apps.extensions import db_serv, mail
 from flask_mail import Message
 
 app = Flask(__name__)
+
 CORS(app)
+
+IS_PRODUCTION = os.environ.get("RENDER", "False") == "true"
 
 # CONFIGURAÇÕES DE E-MAIL DINÂMICAS
 app.config['MAIL_SERVER'] = os.environ.get("MAIL_SERVER")
@@ -17,9 +20,9 @@ app.config['MAIL_USERNAME'] = os.environ.get("MAIL_USERNAME")
 app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get("MAIL_USERNAME")
 
-# CONFIGURAÇÃO DO BANCO DE DADOS
-DB_USER = os.environ.get("MYSQL_USER_APP", "root")
-DB_PASSWORD = os.environ.get("MYSQL_PASSWORD_APP", "12345")
+# CONFIGURAÇÃO DO BANCO DE DADOS 
+DB_USER = os.environ.get("MYSQL_USER_APP") if IS_PRODUCTION else os.environ.get("MYSQL_USER_APP", "root")
+DB_PASSWORD = os.environ.get("MYSQL_PASSWORD_APP") if IS_PRODUCTION else os.environ.get("MYSQL_PASSWORD_APP", "12345")
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = os.environ.get("DB_PORT")
 DB_NAME = os.environ.get("DB_NAME")
@@ -32,10 +35,10 @@ db_serv.init_app(app)
 mail.init_app(app)
 swagger = Swagger(app)
 
-# CONFIGURAÇÕES GERAIS
+# CONFIGURAÇÕES GERAIS 
 app.config['HOST'] = "0.0.0.0"
 app.config['PORT'] = 5002
-app.config['DEBUG'] = True
+app.config['DEBUG'] = False if IS_PRODUCTION else True
 
 # REGISTRO DE BLUEPRINTS 
 from apps.lanche.route_lanche import bd_Lanche
