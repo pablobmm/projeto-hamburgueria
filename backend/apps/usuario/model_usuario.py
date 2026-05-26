@@ -12,7 +12,7 @@ class Usuario(db_serv.Model):
     bairro = db_serv.Column(db_serv.String(100), nullable=False)
     cep = db_serv.Column(db_serv.String(9), nullable=True)
     senha_hash = db_serv.Column(db_serv.String(256), nullable=False) 
-    otp_secret = db_serv.Column(db_serv.Integer, nullable=True) 
+    otp_secret = db_serv.Column(db_serv.String(6), nullable=True)
     is_active = db_serv.Column(db_serv.Boolean, default= False, nullable=False) 
 
 

@@ -1,13 +1,10 @@
 import random, string
-from flask import request, jsonify, Blueprint, current_app
+from flask import request, jsonify, Blueprint
 from werkzeug.security import generate_password_hash
-from flask_mail import Message
-from apps.extensions import db_serv, mail 
+from apps.extensions import db_serv
 from apps.usuario.model_usuario import Usuario 
-from apps.usuario.email_templates import renderizar_template_email
 
 bd_usuario = Blueprint('usuario', __name__)
-
 
 @bd_usuario.route('/cadastro', methods=['POST'])
 def cadastrar_usuario():
@@ -34,28 +31,14 @@ def cadastrar_usuario():
     try:
         db_serv.session.add(novo_usuario)
         db_serv.session.commit()
-        print(f"Usuário {nome_cliente} salvo com sucesso!")
+        print(f"Usuário {nome_cliente} salvo com sucesso no banco!")
 
-        try:
-            html_conteudo = renderizar_template_email(
-                nome=nome_cliente, 
-                codigo=token_ativacao,
-                titulo_contexto="Ative sua Conta!",
-                texto_contexto="Seja bem-vindo à nossa comunidade! Use o código de ativação abaixo para confirmar seu perfil:"
-            )
-            
-            msg = Message(
-                subject="Ative sua conta - Code Burger",
-                sender=current_app.config['MAIL_USERNAME'],
-                recipients=[email_cliente],
-                html=html_conteudo 
-            )
-            mail.send(msg)
-            print("E-mail com template HTML enviado com sucesso!")
-        except Exception as e_mail:
-            print(f"Erro ao enviar e-mail: {e_mail}")
-
-        return jsonify({"message": "Usuário cadastrado! Verifique seu e-mail."}), 201
+        return jsonify({
+            "message": "Usuário cadastrado com sucesso!",
+            "token": token_ativacao,
+            "nome": nome_cliente,
+            "email": email_cliente
+        }), 201
 
     except Exception as e:
         db_serv.session.rollback()
@@ -67,33 +50,23 @@ def recuperar_senha():
     dados = request.get_json()
     email_usuario = dados.get('email')
 
-    # Busca o usuário para salvar o código
     usuario = Usuario.query.filter_by(email=email_usuario).first()
     
     if not usuario:
         return jsonify({"message": "Usuário não encontrado."}), 404
 
-    # Código aleatório de 6 dígitos
     codigo_recuperacao = ''.join(random.choices(string.digits, k=6))
 
     try:
-        # Salva o código no banco na coluna otp_secret 
         usuario.otp_secret = codigo_recuperacao
         db_serv.session.commit()
 
-        # Criar e enviar a mensagem
-        msg = Message(
-            subject="Recuperação de Senha - Code Burger",
-            recipients=[email_usuario],
-            body=f"Olá!\n\nRecebemos uma solicitação de recuperação de senha.\n"
-                 f"Seu código de segurança é: {codigo_recuperacao}\n\n"
-                 f"Se você não solicitou isso, ignore este e-mail."
-        )
-        mail.send(msg)
-        
         return jsonify({
-            "message": "Código de recuperação enviado com sucesso!",
-            "status": "success"
+            "status": "success",
+            "message": "Código de recuperação gerado com sucesso!",
+            "token": codigo_recuperacao,
+            "nome": usuario.nome,
+            "email": email_usuario
         }), 200
 
     except Exception as e:
@@ -114,27 +87,20 @@ def reenviar_codigo():
         novo_codigo = str(random.randint(100000, 999999))
         usuario.otp_secret = novo_codigo
         
-        db_serv.session.add(usuario)
-        db_serv.session.commit()
-
         try:
-            html_conteudo = renderizar_template_email(
-                nome=usuario.nome, 
-                codigo=novo_codigo,
-                titulo_contexto="Novo Código de Ativação",
-                texto_contexto="Você solicitou um novo código de verificação. Aqui está ele:"
-            )
-            
-            msg = Message(
-                subject="Novo código de ativação - Code Burger",
-                recipients=[email],
-                html=html_conteudo 
-            )
-            mail.send(msg)
-            return jsonify({"mensagem": "Novo código enviado!"}), 200
+            db_serv.session.add(usuario)
+            db_serv.session.commit()
+
+            return jsonify({
+                "mensagem": "Novo código gerado com sucesso!",
+                "token": novo_codigo,
+                "nome": usuario.nome,
+                "email": email
+            }), 200
         except Exception as e:
-            print(f"Erro ao enviar reenvio: {e}")
-            return jsonify({"erro": "Falha ao enviar e-mail"}), 500
+            db_serv.session.rollback()
+            print(f"Erro ao salvar reenvio: {e}")
+            return jsonify({"erro": "Falha ao gerar novo código no servidor"}), 500
             
     return jsonify({"erro": "Usuário não encontrado."}), 404
 
@@ -148,16 +114,13 @@ def verificar_codigo():
     if not email or not codigo_recebido:
         return jsonify({"erro": "Email e código são obrigatórios"}), 400
 
-    # .populate_existing() garante que pegou os dados do banco
     usuario = Usuario.query.filter_by(email=email).populate_existing().first()
 
     if usuario and usuario.otp_secret is not None:
-        # Compara o código salvo no banco com o que o usuário digitou
         if str(usuario.otp_secret) == str(codigo_recebido):
             try:
-                # Ativa a conta
                 usuario.is_active = True
-                usuario.otp_secret = None # Limpa o código para não ser usado de novo
+                usuario.otp_secret = None 
                 
                 db_serv.session.add(usuario)
                 db_serv.session.commit()

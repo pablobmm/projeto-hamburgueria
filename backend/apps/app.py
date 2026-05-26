@@ -3,7 +3,6 @@ from flask import Flask
 from flask_cors import CORS
 from flasgger import Swagger
 from apps.extensions import db_serv, mail 
-from flask_mail import Message
 
 app = Flask(__name__)
 
@@ -32,7 +31,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # INICIALIZAÇÃO DAS EXTENSÕES 
 db_serv.init_app(app)
-mail.init_app(app)
 swagger = Swagger(app)
 
 # CONFIGURAÇÕES GERAIS 

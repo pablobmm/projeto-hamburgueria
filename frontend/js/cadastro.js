@@ -18,7 +18,7 @@ function showToast(title, description) {
 
 function hideToast() {
     const toast = document.getElementById('toast');
-    toast.classList.remove('show');
+    toast.remove('show');
     setTimeout(() => {
         toast.classList.add('hidden');
     }, 300);
@@ -76,7 +76,6 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
     const confirmPassword = document.getElementById('confirmPassword').value;
     const cadastroBtn = document.getElementById('cadastroBtn');
     
-   
     if (!nome || !email || !telefone || !endereco || !numero || !bairro || !password || !confirmPassword) {
         showToast('Erro', 'Por favor, preencha todos os campos');
         return;
@@ -105,12 +104,10 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
         showToast('Erro', 'O campo Bairro não deve conter números.');
         return;
     }
-
     if (!validateCep(cep)) {
         showToast('Erro', 'Por favor, insira um CEP válido com 8 dígitos.');
         return;
     }
-    
     
     cadastroBtn.textContent = 'Criando conta...';
     cadastroBtn.classList.add('loading');
@@ -132,27 +129,52 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
             senha: password 
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            showToast('Conta criada!', data.message);
-            setTimeout(() => {
-                window.location.href = `verificar.html?email=${encodeURIComponent(email)}`;
-            }, 2000);
+    .then(response => {
+        if (response.status === 201) {
+            return response.json();
         } else {
-            showToast('Erro no Cadastro', data.erro);
+            return response.json().then(err => { throw new Error(err.erro || 'Erro no servidor') });
+        }
+    })
+    .then(data => {
+        if (data.token) {
+            console.log("Usuário criado no banco. Disparando e-mail pelo EmailJS...");
+
+            const templateParams = {
+                nome: data.nome,
+                email: data.email,
+                token: data.token
+            };
+
+            emailjs.send('service_oxv3h38', 'm0qwfi6', templateParams)
+                .then(function(emailResponse) {
+                    console.log('E-mail enviado via EmailJS com sucesso!', emailResponse.status, emailResponse.text);
+                    
+                    showToast('Conta criada!', 'Verifique seu e-mail para ativar.');
+                    setTimeout(() => {
+                        window.location.href = `verificar.html?email=${encodeURIComponent(email)}`;
+                    }, 2000);
+                    
+                }, function(emailError) {
+                    console.error('Falha ao disparar o EmailJS:', emailError);
+                    
+                    showToast('Aviso', 'Conta criada, mas houve uma lentidão no envio do e-mail.');
+                    setTimeout(() => {
+                        window.location.href = `verificar.html?email=${encodeURIComponent(email)}`;
+                    }, 2000);
+                });
         }
     })
     .catch(error => {
-        console.error('Erro de fetch:', error);
-        showToast('Erro de Conexão', 'Não foi possível conectar ao servidor.');
+        console.error('Erro de fetch ou cadastro:', error);
+        showToast('Erro no Cadastro', error.message || 'Não foi possível conectar ao servidor.');
     })
     .finally(() => {
         cadastroBtn.textContent = 'Criar conta';
         cadastroBtn.classList.remove('loading');
         cadastroBtn.disabled = false;
     });
-});
+}); 
 
 document.getElementById('cep').addEventListener('input', function(e) {
     let value = e.target.value.replace(/\D/g, ''); 

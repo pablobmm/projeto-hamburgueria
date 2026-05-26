@@ -7,6 +7,13 @@
     <title>Cadastro - Code Burger</title>
     <link rel="shortcut icon" href="../logoicone/logo_codeburger.png" type="image/x-icon">
     <link rel="stylesheet" href="../css/login_cadastro.css">
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            emailjs.init(window.env?.NEXT_PUBLIC_EMAILJS_KEY || "PUBLIC_KEY");
+        })();
+    </script>
 </head>
 
 <body>
@@ -25,6 +32,7 @@
             </nav>
         </div>
     </header>
+
     <div class="page-container">
         <div class="form-wrapper">
             <div class="header-section">
@@ -67,25 +75,23 @@
                         </div>
 
                         <div class="input-group">
-                            <label for="endereco" class="label">Bairro</label>
+                            <label for="bairro" class="label">Bairro</label>
                             <input type="text" id="bairro" class="input" placeholder="Mooca" required>
                         </div>
 
                         <div class="input-group">
-                            <label for="endereco" class="label">CEP</label>
+                            <label for="cep" class="label">CEP</label>
                             <input type="text" id="cep" class="input" placeholder="12345-678" required>
                         </div>
 
                         <div class="input-group">
                             <label for="password" class="label">Senha</label>
-                            <input type="password" id="password" class="input" placeholder="••••••••" required
-                                minlength="6">
+                            <input type="password" id="password" class="input" placeholder="••••••••" required minlength="6">
                         </div>
 
                         <div class="input-group">
                             <label for="confirmPassword" class="label">Confirmar senha</label>
-                            <input type="password" id="confirmPassword" class="input" placeholder="••••••••" required
-                                minlength="6">
+                            <input type="password" id="confirmPassword" class="input" placeholder="••••••••" required minlength="6">
                         </div>
 
                         <button type="submit" class="btn btn-gradient btn-full" id="cadastroBtn">
