@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function buscarLanches() {
-    const urlAPI = 'http://localhost:5002/api/lanche';
+    const urlAPI = 'https://code-burger-api.onrender.com/api/lanche';
     try {
         const response = await fetch(urlAPI);
 
@@ -75,7 +75,7 @@ function exibirLanchesNaPagina(lanches, categoriaAtual) {
         if (lanche.imagem && lanche.imagem.startsWith('http')) {
             imageUrl = lanche.imagem;
         } else if (lanche.imagem && lanche.imagem.startsWith('static/')) {
-            imageUrl = `http://localhost:5002/${lanche.imagem}`;
+            imageUrl = `https://code-burger-api.onrender.com/${lanche.imagem}`;
         } else if (lanche.imagem) {
             const imagensPadraoNativas = [
                 'burger1.png', 'burger2.png', 'burger3.png', 'burger4.png', 'burger5.png', 'burger6.png',
@@ -122,5 +122,5 @@ function selecionarLanche(nome, imagemUrl, preco, descricao) {
     };
 
     localStorage.setItem('lancheParaPersonalizar', JSON.stringify(lancheSelecionado));
-    window.location.href = '/frontend/pages/personalizacao.html';
+    window.location.href = '../pages/personalizacao.html';
 }

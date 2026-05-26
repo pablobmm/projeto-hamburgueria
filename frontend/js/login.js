@@ -23,7 +23,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
     loginBtn.classList.add('loading');
     loginBtn.disabled = true;
     
-    fetch('http://127.0.0.1:5002/login', { 
+    fetch('https://code-burger-api.onrender.com/login', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, senha: password })

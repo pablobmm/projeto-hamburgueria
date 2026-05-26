@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.disabled = true;
 
         try {
-            const response = await fetch('http://localhost:5002/pedido/checkout', {
+            const response = await fetch('https://code-burger-api.onrender.com/pedido/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

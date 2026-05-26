@@ -1,5 +1,5 @@
-const API_URL = "http://localhost:5002/admin/stats";
-const API_PRODUTOS = "http://localhost:5002/admin/produtos";
+const API_URL = "https://code-burger-api.onrender.com/admin/stats";
+const API_PRODUTOS = "https://code-burger-api.onrender.com/admin/produtos";
 
 const modal = document.getElementById("modalLanche");
 const formLanche = document.getElementById("formLanche");
@@ -44,7 +44,7 @@ async function carregarProdutos() {
             if (p.imagem && p.imagem.startsWith('http')) {
                 imageUrl = p.imagem;
             } else if (p.imagem && p.imagem.startsWith('static/')) {
-                imageUrl = `http://localhost:5002/${p.imagem}`;
+                imageUrl = `https://code-burger-api.onrender.com/${p.imagem}`;
             } else if (p.imagem) {
                 const imagensPadraoNativas = [
                     'burger1.png', 'burger2.png', 'burger3.png', 'burger4.png', 'burger5.png', 'burger6.png',

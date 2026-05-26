@@ -116,7 +116,7 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
     cadastroBtn.classList.add('loading');
     cadastroBtn.disabled = true;
     
-    fetch('http://127.0.0.1:5002/usuario/cadastro', {
+    fetch('https://code-burger-api.onrender.com/usuario/cadastro', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
