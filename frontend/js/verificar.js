@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         verifyBtn.disabled = true;
 
         try {
-            const response = await fetch('http://127.0.0.1:5002/usuario/verificar', {
+            const response = await fetch('https://code-burger-api.onrender.com/usuario/verificar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = urlParams.get('email');
 
         try {
-            const res = await fetch('http://127.0.0.1:5002/usuario/reenviar-codigo', {
+            const res = await fetch('https://code-burger-api.onrender.com/usuario/reenviar-codigo', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email })

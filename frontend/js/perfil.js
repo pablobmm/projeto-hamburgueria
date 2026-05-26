@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
             endereco: document.getElementById("editEndereco").value
         };
 
-        fetch(`http://127.0.0.1:5002/usuario/atualizar/${usuario.id}`, {
+        fetch(`https://code-burger-api.onrender.com/usuario/atualizar/${usuario.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dadosAtualizados)
