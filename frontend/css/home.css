@@ -425,9 +425,35 @@ footer {
     .hero h1 { font-size: 44px; }
     .search .sides { flex-direction: column; gap: 20px; }
     .products-grid { grid-template-columns: repeat(2, 1fr); }
+
+    
+    header #nav-menu .user-profile-mobile {
+        display: flex !important;
+        width: 100% !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 10px 0 20px 0 !important;
+        border-bottom: 1px solid #2b2b2b !important;
+        margin-bottom: 15px !important;
+        font-size: 20px !important;
+        position: relative !important;
+        top: 0 !important;
+        right: 0 !important;
+        z-index: 1 !important;
+    }
+
+    header .container .logo {
+        position: absolute !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 9999 !important;
+    }
+
+    header .container .logo a {
+        font-size: 28px !important;
+    }
 }
 
-/* ===== Regras Globais Organizadoras (Fora do Media Query) ===== */
 header {
     position: relative;
 }

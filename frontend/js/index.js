@@ -12,22 +12,29 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loginBtn) loginBtn.closest('.rightside').remove();
     if (cadastroBtn) cadastroBtn.closest('.rightside').remove();
 
-    const navContainer = document.querySelector("nav");
-
-    // Cria a área do perfil do usuário
     const userArea = document.createElement("div");
-    userArea.className = "rightside user-profile";
+    const isMobile = window.innerWidth <= 820;
+    userArea.className = isMobile ? "user-profile-mobile" : "rightside user-profile"; 
+    
     userArea.innerHTML = `
-    <span style="color: white; margin-right: 15px;">
+    <span style="color: white;">
       Olá, <a href="../pages/perfil.html" style="color: white; text-decoration: underline;"><strong>${usuario.nome.split(' ')[0]}</strong></a>
     </span>
-    <a href="#" id="logout-btn" title="Sair" style="color: #ef4444; font-size: 1.2rem;">
+    <a href="#" id="logout-btn" title="Sair" style="color: #ef4444; font-size: 1.2rem; margin-left: 10px;">
       <i class="fa-solid fa-right-from-bracket"></i>
     </a>
     `;
 
-    if (navContainer) {
-        navContainer.appendChild(userArea);
+    if (isMobile) {
+        const navMenu = document.getElementById("nav-menu");
+        if (navMenu) {
+            navMenu.insertBefore(userArea, navMenu.firstChild);
+        }
+    } else {
+        const headerContainer = document.querySelector("header .container");
+        if (headerContainer) {
+            headerContainer.appendChild(userArea);
+        }
     }
 
     // Lógica de Logout
