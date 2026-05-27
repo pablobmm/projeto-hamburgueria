@@ -75,8 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 precoFinal = parseFloat(str) || 0.0;
             }
 
+            let idRealDoLanche = Number(item.lanche_id || item.id || 1);
+            if (idRealDoLanche > 10000) {
+                idRealDoLanche = 1;
+            }
+
             return {
-                lanche_id: Number(item.id || item.lanche_id || 1), 
+                lanche_id: idRealDoLanche, 
                 preco: precoFinal,
                 qtd: Number(item.quantidade || item.qtd || 1)
             };

@@ -52,7 +52,7 @@ def checkout():
                 "pending": "https://code-burger-kappa.vercel.app/pages/carrinho.html"
             },
             "external_reference": str(novo_pedido.id),
-            "notification_url": "https://linseed-marrow-shopping.ngrok-free.dev/pedido/webhook"
+            "notification_url": "https://code-burger-api.onrender.com/pedido/webhook"
         }
 
         preference_response = sdk.preference().create(preference_data)
