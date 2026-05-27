@@ -136,17 +136,20 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
             return response.json().then(err => { throw new Error(err.erro || 'Erro no servidor') });
         }
     })
+    
     .then(data => {
         if (data.token) {
-            console.log("Usuário criado no banco. Disparando e-mail pelo EmailJS...");
+            console.log("Usuário criado no Clever Cloud! Disparando e-mail pelo EmailJS...");
 
             const templateParams = {
-                name: data.nome,
-                email: data.email,
-                token: data.token
+                name: data.nome || nome,    
+                email: data.email || email,  
+                token: data.token            
             };
 
-            emailjs.send('service_oxv3h38', 'm0qwfi6', templateParams)
+            console.log("Parâmetros enviados ao EmailJS:", templateParams);
+
+            emailjs.send('service_oxv3h38', 'template_0ytq64p', templateParams)
                 .then(function(emailResponse) {
                     console.log('E-mail enviado via EmailJS com sucesso!', emailResponse.status, emailResponse.text);
                     
@@ -156,15 +159,18 @@ document.getElementById('cadastroForm').addEventListener('submit', function(e) {
                     }, 2000);
                     
                 }, function(emailError) {
-                    console.error('Falha ao disparar o EmailJS:', emailError);
+                    console.error('Falha crítica ao disparar o EmailJS:', emailError);
                     
-                    showToast('Aviso', 'Conta criada, mas houve uma lentidão no envio do e-mail.');
+                    showToast('Aviso', 'Conta criada! Anote seu código caso não chegue: ' + data.token);
                     setTimeout(() => {
                         window.location.href = `verificar.html?email=${encodeURIComponent(email)}`;
-                    }, 2000);
+                    }, 4000);
                 });
+        } else {
+            showToast('Erro', 'O servidor não retornou o token de ativação.');
         }
     })
+
     .catch(error => {
         console.error('Erro de fetch ou cadastro:', error);
         showToast('Erro no Cadastro', error.message || 'Não foi possível conectar ao servidor.');

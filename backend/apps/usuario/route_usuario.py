@@ -3,6 +3,7 @@ from flask import request, jsonify, Blueprint
 from werkzeug.security import generate_password_hash
 from apps.extensions import db_serv
 from apps.usuario.model_usuario import Usuario 
+from sqlalchemy import func
 
 bd_usuario = Blueprint('usuario', __name__)
 
@@ -50,7 +51,7 @@ def recuperar_senha():
     dados = request.get_json()
     email_usuario = dados.get('email')
 
-    usuario = Usuario.query.filter_by(email=email_usuario).first()
+    usuario = Usuario.query.filter(func.lower(Usuario.email) == func.lower(email_usuario)).first()
     
     if not usuario:
         return jsonify({"message": "Usuário não encontrado."}), 404
@@ -81,7 +82,7 @@ def reenviar_codigo():
     data = request.get_json()
     email = data.get('email')
     
-    usuario = Usuario.query.filter_by(email=email).first()
+    usuario = Usuario.query.filter(func.lower(Usuario.email) == func.lower(email)).first()
     
     if usuario:
         novo_codigo = str(random.randint(100000, 999999))
@@ -114,7 +115,7 @@ def verificar_codigo():
     if not email or not codigo_recebido:
         return jsonify({"erro": "Email e código são obrigatórios"}), 400
 
-    usuario = Usuario.query.filter_by(email=email).populate_existing().first()
+    usuario = Usuario.query.filter(func.lower(Usuario.email) == func.lower(email)).populate_existing().first()
 
     if usuario and usuario.otp_secret is not None:
         if str(usuario.otp_secret) == str(codigo_recebido):
@@ -158,7 +159,7 @@ def atualizar_perfil(id):
     try:
         db_serv.session.commit()
         return jsonify({
-            "mensagem": "Dados atualizados com sucesso!",
+            "mensagem": "Dados updated com sucesso!",
             "usuario": usuario.to_dict()
         }), 200
     except Exception as e:
