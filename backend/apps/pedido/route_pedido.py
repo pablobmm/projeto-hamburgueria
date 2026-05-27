@@ -46,9 +46,9 @@ def checkout():
                 "name": payer_name
             },
             "back_urls": {
-                "success": "http://localhost:5500/frontend/pages/index.html",
-                "failure": "http://localhost:5500/frontend/pages/carrinho.html",
-                "pending": "http://localhost:5500/frontend/pages/carrinho.html"
+                "success": "https://code-burger-kappa.vercel.app/pages/index.html",
+                "failure": "https://code-burger-kappa.vercel.app/pages/carrinho.html",
+                "pending": "https://code-burger-kappa.vercel.app/pages/carrinho.html"
             },
             "external_reference": str(novo_pedido.id),
             "notification_url": "https://linseed-marrow-shopping.ngrok-free.dev/pedido/webhook"
@@ -127,7 +127,7 @@ def webhook():
                         
             except Exception as e:
                 db_serv.session.rollback()
-                print(f"Erro ao processar webhook do Mercado Pago: {e}")
-                return jsonify({"erro": "Erro interno ao processar notificação"}), 500
+                print(f"ERRO NO CHECKOUT MERCADO PAGO: {e}")
+                return jsonify({"erro": "Erro interno ao processar o checkout.", "detalhes": str(e)}), 500
 
     return jsonify({"status": "recebido"}), 200
