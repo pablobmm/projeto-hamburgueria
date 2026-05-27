@@ -36,7 +36,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
             showToast('Login realizado!', `Bem-vindo, ${data.usuario.nome}`);
             
             setTimeout(() => { 
-                window.location.href = 'index.html'; 
+                window.location.href = '/'; 
             }, 1500);
         } else {
             showToast('Erro de Login', data.erro || 'Credenciais inválidas');

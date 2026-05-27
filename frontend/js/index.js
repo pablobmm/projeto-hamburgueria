@@ -6,26 +6,29 @@ document.addEventListener("DOMContentLoaded", () => {
   if (usuarioData) {
     const usuario = JSON.parse(usuarioData);
 
-    // Localiza os botões de Login e Cadastro para remover
-    const loginBtn = document.querySelector('a[href="login.html"]');
-    const cadastroBtn = document.querySelector('a[href="cadastro.html"]');
+    const loginBtn = document.querySelector('a[href*="login.html"]');
+    const cadastroBtn = document.querySelector('a[href*="cadastro.html"]');
 
-    if (loginBtn) loginBtn.parentElement.remove();
-    if (cadastroBtn) cadastroBtn.parentElement.remove();
+    if (loginBtn) loginBtn.closest('.rightside').remove();
+    if (cadastroBtn) cadastroBtn.closest('.rightside').remove();
+
+    const navContainer = document.querySelector("nav");
 
     // Cria a área do perfil do usuário
     const userArea = document.createElement("div");
     userArea.className = "rightside user-profile";
     userArea.innerHTML = `
     <span style="color: white; margin-right: 15px;">
-      Olá, <a href="perfil.html" style="color: white; text-decoration: underline;"><strong>${usuario.nome.split(' ')[0]}</strong></a>
+      Olá, <a href="../pages/perfil.html" style="color: white; text-decoration: underline;"><strong>${usuario.nome.split(' ')[0]}</strong></a>
     </span>
     <a href="#" id="logout-btn" title="Sair" style="color: #ef4444; font-size: 1.2rem;">
       <i class="fa-solid fa-right-from-bracket"></i>
     </a>
     `;
 
-    navContainer.appendChild(userArea);
+    if (navContainer) {
+        navContainer.appendChild(userArea);
+    }
 
     // Lógica de Logout
     document.getElementById("logout-btn").addEventListener("click", (e) => {

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const usuarioData = localStorage.getItem("usuarioLogado");
     if (!usuarioData) {
-        window.location.href = "login.html";
+        window.location.href = "../pages/login.html";
         return;
     }
 
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     showToast('Sucesso', data.mensagem);
 
                     setTimeout(() => {
-                        window.location.href = "index.html";
+                        window.location.href = "../index.html";
                     }, 2000);
                 } else {
                     showToast('Erro', data.erro);

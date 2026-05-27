@@ -159,7 +159,7 @@ def atualizar_perfil(id):
     try:
         db_serv.session.commit()
         return jsonify({
-            "mensagem": "Dados updated com sucesso!",
+            "mensagem": "Dados atualizados com sucesso!",
             "usuario": usuario.to_dict()
         }), 200
     except Exception as e:
