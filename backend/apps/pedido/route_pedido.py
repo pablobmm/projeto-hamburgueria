@@ -17,20 +17,21 @@ def checkout():
     payer_name = dados.get('nome', 'Cliente')
 
     if not usuario_id or not itens:
-        return jsonify({"erro": "Dados insuficientes para processar o checkout."}), 400
+        return jsonify({"erro": "Dados insuficientes para processar o checkout. Certifique-se de estar logado."}), 400
     
     try:
         mp_token = os.environ.get("MERCADOPAGO_ACCESS_TOKEN")
         if not mp_token:
-            return jsonify({"erro": "Configuração do meio de pagamento ausente no servidor."}), 500
+            print("ERRO CRÍTICO: MERCADOPAGO_ACCESS_TOKEN nao foi encontrado no Render!")
+            return jsonify({"erro": "Configuração do meio de pagamento ausente no servidor do Render."}), 500
 
         sdk = mercadopago.SDK(mp_token)
 
-        total = sum(item['preco'] * item['qtd'] for item in itens)
+        total = sum(float(item['preco']) * int(item['qtd']) for item in itens)
         
-        novo_pedido = Pedido(usuario_id=usuario_id, valor_total=total, status="pendente")
+        novo_pedido = Pedido(usuario_id=int(usuario_id), valor_total=total, status="pendente")
         db_serv.session.add(novo_pedido)
-        db_serv.session.flush()
+        db_serv.session.flush() 
 
         preference_data = {
             "items": [
@@ -55,22 +56,22 @@ def checkout():
         }
 
         preference_response = sdk.preference().create(preference_data)
-        mp_res = preference_response["response"]
+        mp_res = preference_response.get("response", {})
 
-        print("RETORNO DETALHADO DO MERCADO PAGO (PREFERENCE):", mp_res, flush=True)
+        print(f"RETORNO DO MERCADO PAGO: {mp_res}")
 
         if "id" not in mp_res:
             db_serv.session.rollback()
-            return jsonify({"erro": "Falha ao gerar preferência de pagamento no Mercado Pago", "detalhes": mp_res}), 400
+            return jsonify({"erro": "O Mercado Pago recusou as credenciais enviadas.", "detalhes": mp_res}), 400
 
         novo_pedido.mp_payment_id = str(mp_res.get("id")) 
 
         for item in itens:
             novo_item = ItemPedido(
                 pedido_id=novo_pedido.id,
-                lanche_id=item['lanche_id'],
-                quantidade=item['qtd'],
-                preco_unitario=item['preco']
+                lanche_id=int(item['lanche_id']),
+                quantidade=int(item['qtd']),
+                preco_unitario=float(item['preco'])
             )
             db_serv.session.add(novo_item)
 
@@ -86,8 +87,8 @@ def checkout():
 
     except Exception as e:
         db_serv.session.rollback()
-        print(f"ERRO NO CHECKOUT MERCADO PAGO: {e}")
-        return jsonify({"erro": "Erro interno ao processar o checkout."}), 500
+        print(f"EXCEÇÃO CRÍTICA NO CHECKOUT: {str(e)}")
+        return jsonify({"erro": "Erro interno no servidor ao processar pagamento.", "detalhes": str(e)}), 500
     
 @pedido_bp.route('/webhook', methods=['POST'])
 def webhook():
@@ -121,13 +122,12 @@ def webhook():
                             pedido.status = status_pagamento 
                         
                         pedido.mp_payment_id = str(id_pagamento)
-                        
                         db_serv.session.commit()
-                        print(f"Pedido #{pedido_id_sistema} atualizado com sucesso para {status_pagamento}!")
+                        print(f"Pedido #{pedido_id_sistema} atualizado via Webhook para {status_pagamento}!")
                         
-            except Exception as e:
+            except Exception as error_webhook:
                 db_serv.session.rollback()
-                print(f"ERRO NO CHECKOUT MERCADO PAGO: {e}")
-                return jsonify({"erro": "Erro interno ao processar o checkout.", "detalhes": str(e)}), 500
+                print(f"Erro ao processar webhook do Mercado Pago: {error_webhook}")
+                return jsonify({"erro": "Erro interno ao processar notificacao", "detalhes": str(error_webhook)}), 500
 
     return jsonify({"status": "recebido"}), 200

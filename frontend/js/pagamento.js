@@ -5,16 +5,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
 
     const usuarioRaw = localStorage.getItem('usuarioLogado');
+    let usuarioLogado = null;
 
     if (usuarioRaw) {
         try {
-            const usuario = JSON.parse(usuarioRaw);
+            usuarioLogado = JSON.parse(usuarioRaw);
             
             if (authButtons) authButtons.style.display = 'none';
             if (userProfile) userProfile.style.display = 'flex';
             
-            if (userNameSpan && usuario.nome) {
-                userNameSpan.innerHTML = `<i class="fas fa-user" style="color: #ff9f1c; margin-right: 6px;"></i>Olá, ${usuario.nome.split(' ')[0]}`;
+            if (userNameSpan && usuarioLogado.nome) {
+                userNameSpan.innerHTML = `<i class="fas fa-user" style="color: #ff9f1c; margin-right: 6px;"></i>Olá, ${usuarioLogado.nome.split(' ')[0]}`;
             }
         } catch (err) {
             console.error("Erro ao processar dados do usuário logado:", err);
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.reload(); 
         });
     }
+
     const cardNumberInput = document.getElementById('card-number');
     const cardNameInput = document.getElementById('card-name');
     const cardExpiryInput = document.getElementById('card-expiry');
@@ -48,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.value = mes + (ano.length > 0 ? '/' + ano : '');
     });
     cardCvcInput.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, ''); });
-
 
     submitButton.addEventListener('click', async (e) => {
         e.preventDefault();
@@ -75,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             return {
-                lanche_id: 1, 
+                lanche_id: Number(item.id || item.lanche_id || 1), 
                 preco: precoFinal,
                 qtd: Number(item.quantidade || item.qtd || 1)
             };
@@ -95,8 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    usuario_id: 1, 
-                    itens: itensFormatadosBackend
+                    usuario_id: usuarioLogado ? usuarioLogado.id : 22, 
+                    itens: itensFormatadosBackend,
+                    email: usuarioLogado ? usuarioLogado.email : 'teste@teste.com',
+                    nome: usuarioLogado ? usuarioLogado.nome : 'Cliente'
                 })
             });
 
