@@ -1,6 +1,41 @@
 let precoBaseLanche = 0;
 let precoTotalAtual = 0;
 const burgerPriceElement = document.getElementById('burger-price');
+let lancheAtual = null;
+
+
+const adicionaisPorCategoria = {
+    Burgers: [
+        { nome: "Molho Tasty", preco: 2.50, imagem: "../assets/adicionais/molho_tasty.png" },
+        { nome: "Cebola fresca", preco: 2.00, imagem: "../assets/adicionais/cebola.png" },
+        { nome: "Alface", preco: 2.00, imagem: "../assets/adicionais/alface.png" },
+        { nome: "Bacon", preco: 3.00, imagem: "../assets/adicionais/bacon.png" },
+        { nome: "Carne", preco: 8.00, imagem: "../assets/adicionais/carne.png" },
+        { nome: "Queijo", preco: 2.00, imagem: "../assets/adicionais/queijo.png" }
+    ],
+
+    Pizza: [
+        { nome: "Mussarela extra", preco: 5.00, imagem: "../assets/adicionais/queijo.png" },
+        { nome: "Calabresa", preco: 6.00, imagem: "../assets/adicionais/bacon.png" },
+        { nome: "Catupiry", preco: 4.00, imagem: "../assets/adicionais/queijo.png" },
+        { nome: "Cebola", preco: 2.00, imagem: "../assets/adicionais/cebola.png" },
+        { nome: "Orégano", preco: 1.00, imagem: "../assets/adicionais/molho_tasty.png" }
+    ],
+
+    Vegetariano: [
+        { nome: "Alface", preco: 2.00, imagem: "../assets/adicionais/alface.png" },
+        { nome: "Cebola roxa", preco: 2.50, imagem: "../assets/adicionais/cebola.png" },
+        { nome: "Queijo", preco: 3.00, imagem: "../assets/adicionais/queijo.png" },
+        { nome: "Molho de ervas", preco: 2.50, imagem: "../assets/adicionais/molho_tasty.png" }
+    ],
+
+    Kids: [
+        { nome: "Queijo", preco: 2.00, imagem: "../assets/adicionais/queijo.png" },
+        { nome: "Bacon", preco: 3.00, imagem: "../assets/adicionais/bacon.png" },
+        { nome: "Ketchup", preco: 1.00, imagem: "../assets/adicionais/molho_tasty.png" },
+        { nome: "Batata palha", preco: 2.00, imagem: "../assets/adicionais/bacon.png" }
+    ]
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     const modoEdicaoAtivado = iniciarModoEdicao();
@@ -8,10 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         carregarDadosDoLanche();
     }
 
-    inicializarContadoresExtras();
-
     const btnAdicionar = document.querySelector('.btn-add');
-    const btnSalvar = document.querySelector('.btn-save');
 
     if (btnAdicionar) {
         btnAdicionar.addEventListener('click', () => adicionarAoCarrinho('carrinho.html'));
@@ -32,6 +64,9 @@ function iniciarModoEdicao() {
         document.getElementById('burger-name').textContent = item.nome;
         document.getElementById('burger-image').src = item.imagem;
         document.getElementById('burger-image').alt = `Imagem de ${item.nome}`;
+
+        carregarAdicionaisPorCategoria(normalizarCategoria(item.categoria || "Burgers"));
+
         document.querySelectorAll(".extra").forEach(extraElement => {
             const extraName = extraElement.querySelector('.extra-name').textContent;
             const extraSalvo = item.extras.find(e => e.nome === extraName);
@@ -61,28 +96,25 @@ function carregarDadosDoLanche() {
 
     if (lancheJson) {
         try {
-            const lanche = JSON.parse(lancheJson);
+            lancheAtual = JSON.parse(lancheJson);
+            lancheAtual.categoria = normalizarCategoria(lancheAtual.categoria);
 
-            document.getElementById('burger-name').textContent = lanche.nome;
-            document.getElementById('burger-image').src = lanche.imagem;
+            document.getElementById('burger-name').textContent = lancheAtual.nome;
 
-            const elementoDescricao = document.querySelector('.produto .descricao');
-            if (elementoDescricao) {
-                elementoDescricao.textContent = lanche.descricao || "Sem descrição disponível.";
-            }
+            precoBaseLanche = parseFloat(lancheAtual.preco);
 
-            precoBaseLanche = parseFloat(lanche.preco);
+            carregarAdicionaisPorCategoria(lancheAtual.categoria);
 
-            document.getElementById('burger-name').textContent = lanche.nome;
+            document.getElementById('burger-name').textContent = lancheAtual.nome;
 
             const descricaoElement = document.querySelector('.produto .descricao');
-            if (descricaoElement && lanche.descricao) {
-                descricaoElement.textContent = lanche.descricao;
+            if (descricaoElement && lancheAtual.descricao) {
+                descricaoElement.textContent = lancheAtual.descricao;
             }
 
             const imgElement = document.getElementById('burger-image');
-            imgElement.src = lanche.imagem;
-            imgElement.alt = `Imagem de ${lanche.nome}`;
+            imgElement.src = lancheAtual.imagem;
+            imgElement.alt = `Imagem de ${lancheAtual.nome}`;
 
             imgElement.onerror = function () {
                 this.src = '/frontend/assets/burgers/burger1.png';
@@ -90,6 +122,7 @@ function carregarDadosDoLanche() {
 
             precoTotalAtual = precoBaseLanche;
             burgerPriceElement.textContent = formatPrice(precoTotalAtual);
+            
         } catch (error) {
             console.error("Erro ao carregar dados do lanche:", error);
         }
@@ -137,10 +170,15 @@ function inicializarContadoresExtras() {
 }
 
 function adicionarAoCarrinho(redirectUrl) {
+
+    const lancheSalvo = JSON.parse(localStorage.getItem("lancheParaPersonalizar"));
+    const categoriaNormalizada = normalizarCategoria(lancheSalvo?.categoria || "Burgers");
+
     const lancheBase = {
         nome: document.getElementById('burger-name').textContent,
         imagem: document.getElementById('burger-image').src,
-        precoBase: precoBaseLanche
+        precoBase: precoBaseLanche,
+        categoria: categoriaNormalizada
     };
 
     const extrasSelecionados = [];
@@ -168,4 +206,29 @@ function adicionarAoCarrinho(redirectUrl) {
     localStorage.setItem('carrinho', JSON.stringify(carrinho));
 
     window.location.href = redirectUrl;
+}
+
+function carregarAdicionaisPorCategoria(categoria) {
+    const listaExtras = document.getElementById("lista-extras");
+    listaExtras.innerHTML = "";
+
+    const categoriaNormalizada = normalizarCategoria(categoria);
+    const adicionais = adicionaisPorCategoria[categoriaNormalizada] || adicionaisPorCategoria.Burgers;
+
+    adicionais.forEach(adicional => {
+        listaExtras.innerHTML += `
+            <li class="extra" data-price="${adicional.preco}">
+                <img src="${adicional.imagem}" alt="${adicional.nome}">
+                <span class="extra-name">${adicional.nome}</span>
+                <span class="extra-price">+ R$ 0,00</span>
+                <div class="contador">
+                    <button class="decrease">-</button>
+                    <input type="text" class="quantity" value="0" readonly>
+                    <button class="increase">+</button>
+                </div>
+            </li>
+        `;
+    });
+
+    inicializarContadoresExtras();
 }

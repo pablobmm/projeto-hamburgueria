@@ -1,5 +1,6 @@
 let todosOsLanches = [];
 
+
 document.addEventListener('DOMContentLoaded', () => {
     buscarLanches();
 });
@@ -97,7 +98,7 @@ function exibirLanchesNaPagina(lanches, categoriaAtual) {
 
         const cardHTML = `
             <a href="#" class="product-item" 
-                onclick="selecionarLanche('${lanche.nome}', '${imageUrl}', '${lanche.preco}', '${descParaOnclick}')"> 
+                onclick="selecionarLanche('${lanche.nome}', '${imageUrl}', '${lanche.preco}', '${descParaOnclick}', '${nomeCategoriaExibição}')"> 
                 <div class="photo">
                     <img src="${imageUrl}" alt="${lanche.nome}" onerror="this.onerror=null; this.src='../assets/burgers/burger1.png'"/>
                 </div>
@@ -113,12 +114,15 @@ function exibirLanchesNaPagina(lanches, categoriaAtual) {
     });
 }
 
-function selecionarLanche(nome, imagemUrl, preco, descricao) {
+function selecionarLanche(nome, imagemUrl, preco, descricao,categoria) {
+    const categoriaNormalizada = normalizarCategoria(categoria);
+
     const lancheSelecionado = {
         nome: nome,
         imagem: imagemUrl,
         preco: preco,
-        descricao: descricao
+        descricao: descricao,
+        categoria: categoriaNormalizada
     };
 
     localStorage.setItem('lancheParaPersonalizar', JSON.stringify(lancheSelecionado));
